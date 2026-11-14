@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import type { ChatMessage, TaskItem, GoalItem } from '../dashboardState';
-import { askCopilot, getAITaskAdvice, isGeminiConfigured } from '@/lib/gemini';
+import { askCopilot, getAITaskAdvice, isGeminiConfigured, setGeminiApiKey, getGeminiApiKey } from '@/lib/gemini';
 
 interface DashCopilotPanelProps {
   isOpen: boolean;
@@ -26,6 +26,8 @@ export function DashCopilotPanel({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isThinking, setIsThinking] = useState(false);
+  const [showKeyInput, setShowKeyInput] = useState(false);
+  const [apiKeyVal, setApiKeyVal] = useState(getGeminiApiKey());
   const bodyRef = useRef<HTMLDivElement>(null);
 
   // Auto scroll to bottom of chat
@@ -53,6 +55,12 @@ export function DashCopilotPanel({
   const handleSuggest = async (promptType: 'plan' | 'prioritize' | 'review') => {
     if (isThinking) return;
 
+    if (!isGeminiConfigured()) {
+      setShowKeyInput(true);
+      addMsg("Please provide your Google Gemini API key to activate Copilot AI features.", 'bot');
+      return;
+    }
+
     if (promptType === 'plan') {
       addMsg('Plan my day', 'user');
       setIsThinking(true);
@@ -65,6 +73,9 @@ export function DashCopilotPanel({
       } catch (err: unknown) {
         const errorMsg = err instanceof Error ? err.message : 'Error generating response';
         addMsg(`⚠️ ${errorMsg}`, 'bot');
+        if (errorMsg.includes('key') || errorMsg.includes('API')) {
+          setShowKeyInput(true);
+        }
       } finally {
         setIsThinking(false);
       }
@@ -78,6 +89,9 @@ export function DashCopilotPanel({
       } catch (err: unknown) {
         const errorMsg = err instanceof Error ? err.message : 'Error prioritizing tasks';
         addMsg(`Tasks reordered by priority. (AI advice: ${errorMsg})`, 'bot');
+        if (errorMsg.includes('key') || errorMsg.includes('API')) {
+          setShowKeyInput(true);
+        }
       } finally {
         setIsThinking(false);
       }
@@ -93,6 +107,9 @@ export function DashCopilotPanel({
       } catch (err: unknown) {
         const errorMsg = err instanceof Error ? err.message : 'Error reviewing week';
         addMsg(`⚠️ ${errorMsg}`, 'bot');
+        if (errorMsg.includes('key') || errorMsg.includes('API')) {
+          setShowKeyInput(true);
+        }
       } finally {
         setIsThinking(false);
       }
@@ -102,6 +119,14 @@ export function DashCopilotPanel({
   const handleSend = async () => {
     const text = inputValue.trim();
     if (!text || isThinking) return;
+
+    if (!isGeminiConfigured()) {
+      addMsg(text, 'user');
+      setInputValue('');
+      setShowKeyInput(true);
+      addMsg("Please provide your Google Gemini API key to chat with Copilot.", 'bot');
+      return;
+    }
 
     addMsg(text, 'user');
     setInputValue('');
@@ -113,33 +138,47 @@ export function DashCopilotPanel({
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to reach Gemini API';
       addMsg(`⚠️ Could not reach Gemini: ${errorMsg}`, 'bot');
+      if (errorMsg.includes('key') || errorMsg.includes('API')) {
+        setShowKeyInput(true);
+      }
     } finally {
       setIsThinking(false);
     }
   };
 
+  const handleSaveKey = () => {
+    if (!apiKeyVal.trim()) return;
+    setGeminiApiKey(apiKeyVal.trim());
+    setShowKeyInput(false);
+    addMsg("✅ Gemini API key saved successfully! You can now ask Copilot anything.", 'bot');
+  };
+
   return (
-    <aside className={`copilot ${isOpen ? 'open' : ''}`} id="copilotPanel">
-      <div className="copilot-inner">
-        {/* Header */}
+    <aside className={`copilot-panel ${isOpen ? 'open' : ''}`} id="copilotPanel">
+      <div className="copilot-panel-inner">
+        {/* Panel Header */}
         <div className="copilot-head">
-          <div className="t" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '18px', height: '18px', color: '#5b8def' }}>
+          <div className="t">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" />
               <circle cx="12" cy="12" r="3.2" />
             </svg>
-            <span>Planly Copilot</span>
-            <span
+            Study Copilot
+            <button
+              onClick={() => setShowKeyInput(!showKeyInput)}
+              title="Click to configure Gemini API Key"
               style={{
-                fontSize: '11px',
-                padding: '2px 7px',
+                marginLeft: '8px',
+                padding: '2px 8px',
                 borderRadius: '12px',
                 background: isGeminiConfigured() ? 'rgba(61, 220, 151, 0.15)' : 'rgba(240, 168, 58, 0.15)',
-                color: isGeminiConfigured() ? '#3ddc97' : '#f0a83a',
                 border: `1px solid ${isGeminiConfigured() ? 'rgba(61, 220, 151, 0.3)' : 'rgba(240, 168, 58, 0.3)'}`,
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
+                gap: '5px',
+                cursor: 'pointer',
+                fontSize: '11px',
+                color: isGeminiConfigured() ? '#3ddc97' : '#f0a83a',
                 fontWeight: 500,
               }}
             >
@@ -152,13 +191,67 @@ export function DashCopilotPanel({
                   display: 'inline-block',
                 }}
               />
-              {isGeminiConfigured() ? 'Gemini 3.5 AI' : 'Key Needed'}
-            </span>
+              {isGeminiConfigured() ? 'Gemini 3.5 AI' : 'Key Needed ⚙️'}
+            </button>
           </div>
           <button className="copilot-close" id="copilotClose" onClick={onClose}>
             ✕
           </button>
         </div>
+
+        {/* Optional In-Chat Key Setup Bar */}
+        {showKeyInput && (
+          <div
+            style={{
+              padding: '12px 16px',
+              background: '#161922',
+              borderBottom: '1px solid #24262d',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+            }}
+          >
+            <div style={{ fontSize: '12px', color: '#e9eaed', fontWeight: 600 }}>
+              🔑 Google Gemini API Key
+            </div>
+            <div style={{ fontSize: '11px', color: '#8c8f99', lineHeight: 1.4 }}>
+              Enter your Gemini API key below. It is saved in your browser and used securely for live AI responses.
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input
+                type="password"
+                placeholder="Paste Gemini API key (AIzaSy... / AQ...)"
+                value={apiKeyVal}
+                onChange={(e) => setApiKeyVal(e.target.value)}
+                style={{
+                  flex: 1,
+                  background: '#0c0d10',
+                  border: '1px solid #2e323e',
+                  borderRadius: '6px',
+                  padding: '6px 10px',
+                  color: '#fff',
+                  fontSize: '12px',
+                  outline: 'none',
+                }}
+              />
+              <button
+                onClick={handleSaveKey}
+                style={{
+                  background: '#3478f6',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '6px 12px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Chat Body */}
         <div className="copilot-body" id="copilotBody" ref={bodyRef}>
