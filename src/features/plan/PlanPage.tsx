@@ -1,0 +1,15 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { archiveActivePlan, loadAllPlanTopics, updateTopicStatus } from '@/lib/progress';
+import type { PlanTopic, TopicStatus } from '@/lib/types';
+import { toast } from 'sonner';
+
+export function PlanPage() {
+  const { user } = useAuth(); const [topics, setTopics] = useState<PlanTopic[]>([]); const [error, setError] = useState('');
+  function refresh() { if (!user) return; loadAllPlanTopics(user.id).then((result) => { setTopics(result.topics); setError(result.error?.message ?? ''); }); }
+  useEffect(() => { refresh(); }, [user]);
+  async function archive() { if (!user || !window.confirm('Archive your active plan?')) return; const result = await archiveActivePlan(user.id); if (result.error) toast.error(result.error.message); else { toast.success('Plan archived.'); setTopics([]); } }
+  async function setStatus(item: PlanTopic, status: TopicStatus) { if (!user) return; const result = await updateTopicStatus(user.id, item.id, status); if (result.error) toast.error(result.error.message); else { toast.success(status === 'done' ? 'Topic marked done.' : status === 'revision' ? 'Topic moved to revision.' : 'Topic skipped.'); refresh(); } }
+  return <div className="space-y-8"><div className="flex items-center justify-between gap-4"><div><h1 className="text-[var(--text-2xl)] font-semibold text-[var(--color-text-display)]">My Plan</h1><p className="text-[var(--text-sm)] text-[var(--color-text-tertiary)] mt-1">Your complete personalized study path</p></div><button type="button" onClick={archive} className="text-[var(--text-sm)] text-[var(--color-error)]">Archive plan</button></div>{error && <p className="text-[var(--text-sm)] text-[var(--color-error)]">{error}</p>}{topics.length ? <div className="space-y-3">{topics.map((item) => <div key={item.id} className="border border-[var(--color-border)] rounded-[var(--radius-md)] p-4"><Link to={`/topic/${item.topicId}`} className="block"><span className="block text-[var(--text-sm)] font-medium text-[var(--color-text-primary)]">{item.topic?.title ?? item.topicId}</span><span className="text-[var(--text-xs)] text-[var(--color-text-tertiary)]">{item.status} · {item.topic?.estimatedMinutes ?? 0} minutes</span></Link><div className="flex flex-wrap gap-2 mt-3"><button type="button" onClick={() => setStatus(item, 'done')} className="text-[var(--text-xs)] text-[var(--color-success)] border border-[var(--color-border)] rounded-[var(--radius-sm)] px-2.5 py-1">Done</button><button type="button" onClick={() => setStatus(item, 'revision')} className="text-[var(--text-xs)] text-[var(--color-warning)] border border-[var(--color-border)] rounded-[var(--radius-sm)] px-2.5 py-1">Revise later</button><button type="button" onClick={() => setStatus(item, 'skipped')} className="text-[var(--text-xs)] text-[var(--color-text-secondary)] border border-[var(--color-border)] rounded-[var(--radius-sm)] px-2.5 py-1">Skip</button></div></div>)}</div> : <p className="text-[var(--text-sm)] text-[var(--color-text-tertiary)]">No active plan topics found.</p>}</div>;
+}
