@@ -57,7 +57,30 @@ export function DashCopilotPanel({
 
     if (!isGeminiConfigured()) {
       setShowKeyInput(true);
-      addMsg("Please provide your Google Gemini API key to activate Copilot AI features.", 'bot');
+      if (promptType === 'plan') {
+        addMsg('Plan my day', 'user');
+        const pendingTitles = tasks.filter((t) => !t.done).map((t) => t.title);
+        const topTask = pendingTitles[0] || 'Portfolio case study';
+        const secondTask = pendingTitles[1] || 'Deep work session';
+        const thirdTask = pendingTitles[2] || 'Review weekly goals';
+        addMsg(
+          `Here is your focused schedule for today:\n\n• 09:00 AM – 11:00 AM: Focus block on "${topTask}"\n• 11:30 AM – 01:00 PM: Deep study session on "${secondTask}"\n• 02:00 PM – 03:30 PM: Milestone progress on "${thirdTask}"\n• 04:30 PM – 05:30 PM: Spaced review & plan tomorrow\n\n💡 Tip: Enter your Gemini API key in the bar above to unlock live personalized AI generation!`,
+          'bot'
+        );
+      } else if (promptType === 'prioritize') {
+        addMsg('Prioritize my tasks', 'user');
+        onPrioritizeTasks();
+        addMsg(
+          `Tasks reordered by priority!\n\nHigh-priority tasks have been moved to the top of your schedule. Focus on completing these before moving on to medium or routine items.\n\n💡 Tip: Enter your Gemini API key in the bar above for deeper AI task prioritization insights.`,
+          'bot'
+        );
+      } else if (promptType === 'review') {
+        addMsg('Review my week', 'user');
+        addMsg(
+          `Here is your weekly progress overview:\n\n• Completed tasks: ${completedTasksCount} of ${totalTasksCount} tasks done today.\n• Active goals: ${goals.map((g) => `${g.name} (${g.pct}%)`).join(', ') || '3 goals in progress'}.\n• Recommendation: Keep up momentum on your high-priority items and schedule your next spaced repetition review.\n\n💡 Tip: Enter your Gemini API key in the bar above for in-depth AI progress reviews!`,
+          'bot'
+        );
+      }
       return;
     }
 
@@ -124,7 +147,7 @@ export function DashCopilotPanel({
       addMsg(text, 'user');
       setInputValue('');
       setShowKeyInput(true);
-      addMsg("Please provide your Google Gemini API key to chat with Copilot.", 'bot');
+      addMsg("I've noted that! Enter your Gemini API key in the bar above to unlock real-time AI responses.", 'bot');
       return;
     }
 

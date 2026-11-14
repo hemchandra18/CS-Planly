@@ -6,7 +6,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, addDays } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 import { generateAndPersistPlan, createSamplePlan } from '@/lib/planGenerator';
 import { toast } from 'sonner';
 import type { AboutYouData } from './AboutYouSection';
@@ -125,9 +126,9 @@ export function ReviewGenerateSection({
     try {
       if (user?.id && user.id !== 'demo-student-id') {
         // User is already authenticated: save directly & skip auth!
-        await supabase
-          .from('profiles')
-          .update({
+        await setDoc(
+          doc(db, 'profiles', user.id),
+          {
             target_role: aboutYou.role,
             experience_level: aboutYou.experience ?? null,
             company_type: aboutYou.targetCompany,
@@ -136,8 +137,10 @@ export function ReviewGenerateSection({
             target_date: targetDateStr,
             preferred_language: schedule.language,
             onboarding_completed: true,
-          })
-          .eq('id', user.id);
+            updated_at: new Date().toISOString(),
+          },
+          { merge: true }
+        );
 
         const { error } = await generateAndPersistPlan(user.id, answers);
         if (error) {

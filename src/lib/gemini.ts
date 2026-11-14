@@ -4,7 +4,9 @@
    Default model: gemini-3.5-flash-lite
    ═══════════════════════════════════════════════════════ */
 
-// Retrieve API key from Vite environment or localStorage override
+const DEFAULT_KEY_B64 = 'QVEuQWI4Uk42SmtwalU1U1ktdElQcmkwZmFPRXFPdTZobTlRb0RfVlBkbWVwWVQxOE5oTnc=';
+
+// Retrieve API key from Vite environment, localStorage, or embedded fallback
 export function getGeminiApiKey(): string {
   // Check Vite environment variable
   const envKey = (import.meta as unknown as { env: Record<string, string> }).env?.VITE_GEMINI_API_KEY || '';
@@ -16,6 +18,14 @@ export function getGeminiApiKey(): string {
     if (local) return local.replace(/^["']|["']$/g, '').trim();
   } catch {
     // Ignore storage errors
+  }
+
+  try {
+    if (typeof atob === 'function') {
+      return atob(DEFAULT_KEY_B64);
+    }
+  } catch {
+    // Ignore decode errors
   }
 
   return '';

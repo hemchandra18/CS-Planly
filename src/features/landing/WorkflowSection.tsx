@@ -20,40 +20,32 @@ export function WorkflowSection() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <section id="workflow-section" className="workflow-section relative min-h-screen flex flex-col justify-center py-8 md:py-10 w-full overflow-hidden">
-      <div className="w-full grid grid-cols-1 lg:grid-cols-12 items-center gap-10 xl:gap-14">
+    <section id="workflow-section" className="workflow-section relative min-h-screen flex flex-col justify-center items-center py-12 md:py-16 w-full overflow-hidden">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-items-center gap-8 xl:gap-12">
         
-        {/* ── Left Column: Clean Floating Comparison Card ── */}
-        <div className="lg:col-span-5 xl:col-span-5 flex justify-start w-full pl-4 sm:pl-8 lg:pl-12">
-          <motion.div 
-            initial={{ 
-              x: -50, 
-              opacity: 0, 
-              rotate: -1.5 
-            }}
-            whileInView={{ 
-              x: 0, 
-              opacity: 1, 
-              rotate: 0 
-            }}
-            viewport={{ once: false, margin: '-60px' }}
-            transition={{ 
-              duration: 1.65, 
-              ease: [0.16, 1, 0.3, 1] 
-            }}
-            style={{ 
-              transformOrigin: 'left center',
-              willChange: 'transform, opacity',
-              display: 'flex', 
-              flexDirection: 'column', 
-              gap: '24px',
-              paddingLeft: '32px',
-              paddingRight: '32px',
-              paddingTop: '30px',
-              paddingBottom: '22px'
-            }}
-            className="w-full max-w-[620px] rounded-3xl bg-gradient-to-b from-slate-900/60 via-slate-950/70 to-black/80 border border-white/15 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.08)] relative overflow-hidden"
-          >
+          {/* ── Left Column: Clean Floating Comparison Card ── */}
+          <div className="flex justify-center w-full">
+            <motion.div 
+              initial={shouldReduceMotion ? { opacity: 0 } : { y: 24, opacity: 0 }}
+              whileInView={shouldReduceMotion ? { opacity: 1 } : { y: 0, opacity: 1 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ 
+                duration: 0.8, 
+                ease: [0.16, 1, 0.3, 1] 
+              }}
+              style={{ 
+                willChange: 'transform, opacity',
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '24px',
+                paddingLeft: '32px',
+                paddingRight: '32px',
+                paddingTop: '30px',
+                paddingBottom: '22px'
+              }}
+              className="w-full max-w-[580px] rounded-3xl bg-gradient-to-b from-slate-900/60 via-slate-950/70 to-black/80 border border-white/15 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.08)] relative overflow-hidden"
+            >
             {/* Subtle Ambient Cosmic Corner Glow */}
             <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-indigo-500/[0.12] to-sky-500/[0.06] rounded-full blur-3xl pointer-events-none" />
 
@@ -160,25 +152,17 @@ export function WorkflowSection() {
         </div>
 
         {/* ── Right Column: Coordinated CS-Planly Engine Panel ── */}
-        <div className="lg:col-span-7 xl:col-span-7 flex justify-center lg:justify-start w-full pr-4 sm:pr-8 lg:pr-12 pl-4 sm:pl-8 lg:pl-0">
+        <div className="flex justify-center w-full">
           <motion.div 
-            initial={{ 
-              x: 50, 
-              opacity: 0, 
-              rotate: 1.5 
-            }}
-            whileInView={{ 
-              x: 0, 
-              opacity: 1, 
-              rotate: 0 
-            }}
-            viewport={{ once: false, margin: '-60px' }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { y: 24, opacity: 0 }}
+            whileInView={shouldReduceMotion ? { opacity: 1 } : { y: 0, opacity: 1 }}
+            viewport={{ once: true, margin: '-40px' }}
             transition={{ 
-              duration: 1.65, 
-              ease: [0.16, 1, 0.3, 1] 
+              duration: 0.8, 
+              ease: [0.16, 1, 0.3, 1],
+              delay: 0.1
             }}
             style={{ 
-              transformOrigin: 'right center',
               willChange: 'transform, opacity',
               display: 'flex', 
               flexDirection: 'column', 
@@ -189,7 +173,7 @@ export function WorkflowSection() {
               paddingTop: '30px',
               paddingBottom: '22px'
             }}
-            className="w-full max-w-[620px] rounded-3xl bg-gradient-to-b from-slate-900/60 via-slate-950/70 to-black/80 border border-white/15 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.08)] relative overflow-hidden select-none"
+            className="w-full max-w-[580px] rounded-3xl bg-gradient-to-b from-slate-900/60 via-slate-950/70 to-black/80 border border-white/15 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.08)] relative overflow-hidden select-none"
           >
             {/* Subtle Ambient Cosmic Corner Glow */}
             <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-indigo-500/[0.12] to-sky-500/[0.06] rounded-full blur-3xl pointer-events-none" />
@@ -500,6 +484,7 @@ export function WorkflowSection() {
         </div>
 
       </div>
-    </section>
-  );
+    </div>
+  </section>
+);
 }
