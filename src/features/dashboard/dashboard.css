@@ -18,7 +18,7 @@
   --sidebar-w: 228px;
   --topbar-h: 58px;
   --summary-w: 290px;
-  --copilot-w: 336px;
+  --copilot-w: 290px;
 }
 
 @media (prefers-color-scheme: light) {
@@ -48,7 +48,8 @@
   font-size: 14px;
   display: flex;
   flex-direction: row;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   z-index: 50;
   margin: 0;
   padding: 0;
@@ -61,7 +62,9 @@ button {
 /* ── Left Sidebar (Fixed) ─────────────────────────── */
 .sidebar {
   width: var(--sidebar-w);
-  flex-shrink: 0;
+  min-width: var(--sidebar-w);
+  max-width: var(--sidebar-w);
+  flex: 0 0 var(--sidebar-w);
   height: 100%;
   background: var(--panel);
   border-right: 1px solid var(--border);
@@ -282,8 +285,8 @@ nav {
 
 /* ── Main Column (Flex: 1) ────────────────────────── */
 .main-col {
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 1 1 0%;
+  min-width: 320px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -1299,7 +1302,9 @@ nav {
 /* ── Fixed Planning Summary Panel (Right) ──────────── */
 .summary-panel {
   width: var(--summary-w);
-  flex-shrink: 0;
+  min-width: var(--summary-w);
+  max-width: var(--summary-w);
+  flex: 0 0 var(--summary-w);
   height: 100%;
   background: var(--panel);
   border-left: 1px solid var(--border);
@@ -1493,30 +1498,40 @@ nav {
 }
 
 /* ── Collapsible Copilot Panel ─────────────────────── */
-.copilot {
+.copilot,
+.copilot-panel {
   width: 0;
-  flex-shrink: 0;
+  min-width: 0;
+  max-width: 0;
+  flex: 0 0 0px;
   height: 100%;
   background: var(--panel);
   border-left: 1px solid transparent;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: width 0.22s ease, border-color 0.22s ease;
+  transition: width 0.22s ease, max-width 0.22s ease, min-width 0.22s ease, border-color 0.22s ease;
 }
 
-.copilot.open {
+.copilot.open,
+.copilot-panel.open {
   width: var(--copilot-w);
+  min-width: var(--copilot-w);
+  max-width: var(--copilot-w);
+  flex: 0 0 var(--copilot-w);
   border-left-color: var(--border);
 }
 
-.copilot-inner {
+.copilot-inner,
+.copilot-panel-inner {
   width: var(--copilot-w);
+  max-width: var(--copilot-w);
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
   height: 100%;
+  overflow: hidden;
 }
 
 .copilot-head {

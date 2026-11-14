@@ -177,47 +177,44 @@ export function DashCopilotPanel({
   };
 
   return (
-    <aside className={`copilot-panel ${isOpen ? 'open' : ''}`} id="copilotPanel">
-      <div className="copilot-panel-inner">
+    <aside className={`copilot ${isOpen ? 'open' : ''}`} id="copilotPanel">
+      <div className="copilot-inner">
         {/* Panel Header */}
         <div className="copilot-head">
-          <div className="t">
+          <div className="t" style={{ gap: '6px' }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" />
               <circle cx="12" cy="12" r="3.2" />
             </svg>
             Study Copilot
-            <button
-              onClick={() => setShowKeyInput(!showKeyInput)}
-              title="Click to configure Gemini API Key"
+            <span
               style={{
-                marginLeft: '8px',
-                padding: '2px 8px',
-                borderRadius: '12px',
-                background: isGeminiConfigured() ? 'rgba(61, 220, 151, 0.15)' : 'rgba(240, 168, 58, 0.15)',
-                border: `1px solid ${isGeminiConfigured() ? 'rgba(61, 220, 151, 0.3)' : 'rgba(240, 168, 58, 0.3)'}`,
+                marginLeft: '4px',
+                padding: '2px 7px',
+                borderRadius: '10px',
+                background: 'rgba(61, 220, 151, 0.15)',
+                border: '1px solid rgba(61, 220, 151, 0.3)',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
-                cursor: 'pointer',
-                fontSize: '11px',
-                color: isGeminiConfigured() ? '#3ddc97' : '#f0a83a',
-                fontWeight: 500,
+                gap: '4px',
+                fontSize: '10px',
+                color: '#3ddc97',
+                fontWeight: 600,
               }}
             >
               <span
                 style={{
-                  width: '6px',
-                  height: '6px',
+                  width: '5px',
+                  height: '5px',
                   borderRadius: '50%',
-                  background: isGeminiConfigured() ? '#3ddc97' : '#f0a83a',
+                  background: '#3ddc97',
                   display: 'inline-block',
                 }}
               />
-              {isGeminiConfigured() ? 'Gemini 3.5 AI' : 'Key Needed ⚙️'}
-            </button>
+              Gemini 3.5 AI
+            </span>
           </div>
-          <button className="copilot-close" id="copilotClose" onClick={onClose}>
+          <button className="copilot-close" id="copilotClose" onClick={onClose} title="Close Copilot">
             ✕
           </button>
         </div>
